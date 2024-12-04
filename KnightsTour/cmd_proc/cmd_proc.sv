@@ -6,7 +6,7 @@
 // module.                                       //
 ///////////////////////////////////////////////////
 module cmd_proc(
-    clk, rst_n, cmd, modified_cmd, cmd_rdy, clr_cmd_rdy, send_resp, strt_cal,
+    clk, rst_n, cmd, y_offset, cmd_rdy, clr_cmd_rdy, send_resp, strt_cal,
     cal_done, heading, heading_rdy, lftIR, cntrIR, rghtIR, error,
     frwrd, moving, tour_go, fanfare_go
 );
@@ -18,7 +18,7 @@ module cmd_proc(
   input         cmd_rdy;                  // command ready
   output logic  clr_cmd_rdy;              // mark command as consumed
   output logic  send_resp;                // command finished, send_response via UART_wrapper/BT
-  output logic [15:0] modified_cmd;             // modified tour command with y-offset appended
+  output logic [2:0] y_offset;            // calibrated y-offset of the Knight (when CALY is asserted)
 
   output logic  strt_cal;                 // initiate calibration of gyro
   input         cal_done;                 // calibration of gyro done
@@ -197,7 +197,7 @@ module cmd_proc(
   assign came_back = (y_pos == 4'h0);
 
   // Concatenate the incoming command with the correct offset after calibration.
-  assign modified_cmd = (opcode == CALY) ? (cmd | (4'h5 - square_cnt)) : cmd; 
+  assign y_offset = (opcode == CALY) ? (4'h5 - square_cnt) : cmd[2:0]; 
   /////////////////////////////////////////////////////////////////////////////////
 
   /////////////////////////////////////////////////////////////////////////

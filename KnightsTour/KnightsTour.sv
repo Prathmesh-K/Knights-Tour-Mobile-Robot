@@ -34,7 +34,7 @@ module KnightsTour(
   wire cmd_rdy_UART;					// cmd ready from UART/Bluetooth  
   wire [9:0] frwrd;						// forward speed
   wire [15:0] cmd;						// multiplexed cmd from TourCmd
-  wire [15:0] modified_cmd;	  // multiplexed modified cmd from cmd_proc
+  wire [2:0] y_offset;	   // calibrated y_offset from cmd_proc
   wire [15:0] cmd_UART;				// command from UART/Bluetooth
   wire clr_cmd_rdy;
   wire tour_go;
@@ -60,7 +60,7 @@ module KnightsTour(
   ////////////////////////////////////
   // Instantiate command processor //
   //////////////////////////////////  
-  cmd_proc #(FAST_SIM) iCMD(.clk(clk),.rst_n(rst_n),.cmd(cmd),.modified_cmd(modified_cmd),.cmd_rdy(cmd_rdy),
+  cmd_proc #(FAST_SIM) iCMD(.clk(clk),.rst_n(rst_n),.cmd(cmd),.y_offset(y_offset),.cmd_rdy(cmd_rdy),
            .clr_cmd_rdy(clr_cmd_rdy),.send_resp(send_resp),.strt_cal(strt_cal),
 		   .cal_done(cal_done),.heading(heading),.heading_rdy(heading_rdy),.lftIR(lftIR),
 		   .cntrIR(cntrIR),.rghtIR(rghtIR),.error(error),.frwrd(frwrd),.moving(moving),
@@ -69,7 +69,7 @@ module KnightsTour(
   ///////////////////////////////////////////////////
   // Instantiate tour logic that solves the moves //
   /////////////////////////////////////////////////  
-  TourLogic iTL(.clk(clk),.rst_n(rst_n),.x_start(modified_cmd[7:4]),.y_start(modified_cmd[3:0]),
+  TourLogic iTL(.clk(clk),.rst_n(rst_n),.x_start(cmd[6:4]),.y_start(y_offset),
                 .go(tour_go),.done(start_tour),.indx(mv_indx),.move(move));
 				
   ///////////////////////////////////////////////////////////////

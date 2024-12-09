@@ -103,7 +103,7 @@ module KnightsTour_tb();
 
   // Checks that we are never off the board.
   always @(negedge clk)
-    ChkOffBoard(.clk(clk), .RST_n(RST_n), .state(iDUT.iCMD.state), .frwrd(iDUT.iCMD.frwrd), .cntrIR(iDUT.iCMD.cntrIR));
+    ChkOffBoard(.clk(clk), .RST_n(RST_n), .frwrd(iDUT.iCMD.frwrd), .cntrIR(iDUT.cntrIR));
   
   always
     #5 clk = ~clk;

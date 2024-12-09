@@ -32,10 +32,10 @@ def collect_design_files(source_dir, target_dir):
                 print(f"Copied design file: {source_file} -> {destination_file}")
 
 def collect_test_files(test_dir, target_dir, test_range):
-    """Collect a range of test files (e.g., KnightsTour_tb_<number>.sv for each number in range)."""
+    """Collect a range of test files or a single test file."""
     found = False
 
-    # Process each test number in the specified range
+    # Handle the range or single test
     for test_number in range(test_range[0], test_range[1] + 1):
         test_filename = f"KnightsTour_tb_{test_number}.sv"
         
@@ -116,7 +116,7 @@ def main():
     )
     parser.add_argument(
         "-t", "--test", type=str,
-        help="Specify a range of test numbers to collect (e.g., 13-16)."
+        help="Specify a single test number or range of test numbers (e.g., 1 or 13-16)."
     )
     parser.add_argument(
         "-ps", "--post_synthesis", action="store_true",
@@ -134,15 +134,20 @@ def main():
     if args.designs:
         collect_design_files(source_designs_dir, target_dir)
     if args.test:
-        # Parse the range from the input argument (e.g., "13-16")
+        # Parse the range or single test number from the input argument
         try:
-            test_range = [int(x) for x in args.test.split('-')]
-            if len(test_range) == 2 and test_range[0] <= test_range[1]:
-                collect_test_files(source_tests_dir, target_dir, test_range)
+            if '-' in args.test:
+                test_range = [int(x) for x in args.test.split('-')]
+                if len(test_range) == 2 and test_range[0] <= test_range[1]:
+                    collect_test_files(source_tests_dir, target_dir, test_range)
+                else:
+                    print("Error: Invalid test range. Please provide a valid range like '13-16'.")
             else:
-                print("Error: Invalid test range. Please provide a valid range like '13-16'.")
+                # Treat single test number as a range with one file
+                test_number = int(args.test)
+                collect_test_files(source_tests_dir, target_dir, [test_number, test_number])
         except ValueError:
-            print("Error: Test range must be specified as two integers, like '13-16'.")
+            print("Error: Test range or number must be a valid integer or range like '13-16'.")
     if args.post_synthesis:
         collect_post_synthesis_files(post_synthesis_dir, target_dir)
 

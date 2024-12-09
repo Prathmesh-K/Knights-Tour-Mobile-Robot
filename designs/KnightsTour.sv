@@ -1,21 +1,20 @@
 module KnightsTour(
-  input logic clk, 
-  input logic RST_n,						// 50MHz clock and asynch active low reset						// SPI input from A2D
-  output logic SS_n,SCLK,MOSI,	            // outputs of SPI to inertial interface
-  input logic MISO,						    // SPI input from gyro
-  input logic INT,						    // interrupt signals from gyro (new readings ready)
-  output logic lftPWM1,lftPWM2,				// left motor PWM controls
-  output logic rghtPWM1,rghtPWM2,				// right motor PWM controls
-  input logic RX,								// UART input from BLE module
-  output logic TX,								// UART output to BLE module
-  output logic piezo,piezo_n,					// to Piezo buzzer (charge fanfare)
-  output logic IR_en,							// Enable 3 IR sensors (for 500usec once every 10ms)
-  input logic lftIR_n,						// goes low if left IR encounters a rail
-  input logic cntrIR_n,						// goes low when center IR crosses a line
-  input logic rghtIR_n						// goes low if right IR encounters a rail
+  input clk, RST_n,						// 50MHz clock and asynch active low reset						// SPI input from A2D
+  output SS_n,SCLK,MOSI,	            // outputs of SPI to inertial interface
+  input MISO,						    // SPI input from gyro
+  input INT,						    // interrupt signals from gyro (new readings ready)
+  output lftPWM1,lftPWM2,				// left motor PWM controls
+  output rghtPWM1,rghtPWM2,				// right motor PWM controls
+  input RX,								// UART input from BLE module
+  output TX,								// UART output to BLE module
+  output piezo,piezo_n,					// to Piezo buzzer (charge fanfare)
+  output IR_en,							// Enable 3 IR sensors (for 500usec once every 10ms)
+  input lftIR_n,						// goes low if left IR encounters a rail
+  input cntrIR_n,						// goes low when center IR crosses a line
+  input rghtIR_n						// goes low if right IR encounters a rail
 );
  
-  parameter FAST_SIM = 1;
+  parameter FAST_SIM = 0;
 
   ////////////////////////
   // Internals signals //

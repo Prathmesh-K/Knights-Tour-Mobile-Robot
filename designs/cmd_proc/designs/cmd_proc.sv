@@ -59,7 +59,6 @@ module cmd_proc(
   logic [4:0] pulse_cnt;               // Indicates number of times cntrIR went high when moving the Knight, max 16 times.
   logic [3:0] square_cnt;              // The number of squares the Knight moved on the board.
   logic pulse_detected;                // Indicates a rising edge on cntrIR.
-  logic pulse_detected;                // Indicates a rising edge on cntrIR.
   logic move_done;                     // Indicates that a move is completed by the Knight.
   logic cntrIR_prev;                   // Previous cntrIR signal from the IR sensor.
   //////////////////////// Y-Calibration Logic ////////////////////////////////////////////
@@ -235,11 +234,14 @@ module cmd_proc(
 
   // Compute the desired heading based on the command.
   always_ff @(posedge clk, negedge rst_n) begin
-    // If the Knight is required to move, take the heading from the command, and if it is non-zero append 0xF
-    // to form the desired heading else, it is zero.
     if (!rst_n)
       desired_heading <= 12'h000; // Reset the flop.
-    else if (move_cmd) begin
+    else if (opcode == CALY) begin // We only care about the below condition if the opcode is CALY.
+      if (calibrate_y)
+          desired_heading <= 12'h000; // We always move north to calibrate the y-position.
+      else if (reverse_heading)
+          desired_heading <= 12'h7FF; // Rotate the Knight CW by 180 degrees to now face south.
+    end else if (move_cmd) begin // If the Knight is required to move, take the heading from the command.
       if (cmd[11:4] == 8'h00)
         desired_heading <= 12'h000;
       else

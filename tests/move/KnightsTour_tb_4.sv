@@ -44,10 +44,10 @@ module KnightsTour_tb();
   // Instantiate model of Knight Physics (and board) //
   ////////////////////////////////////////////////////
   KnightPhysics iPHYS(.clk(clk),.RST_n(RST_n),.SS_n(SS_n),.SCLK(SCLK),.MISO(MISO),
-                    .MOSI(MOSI),.INT(INT),.lftPWM1(lftPWM1),.lftPWM2(lftPWM2),
-					          .rghtPWM1(rghtPWM1),.rghtPWM2(rghtPWM2),.IR_en(IR_en),
-					          .lftIR_n(lftIR_n),.rghtIR_n(rghtIR_n),.cntrIR_n(cntrIR_n)); 
-
+                      .MOSI(MOSI),.INT(INT),.lftPWM1(lftPWM1),.lftPWM2(lftPWM2),
+					  .rghtPWM1(rghtPWM1),.rghtPWM2(rghtPWM2),.IR_en(IR_en),
+					  .lftIR_n(lftIR_n),.rghtIR_n(rghtIR_n),.cntrIR_n(cntrIR_n)); 
+	
   // Task to initialize the testbench.
   task automatic Setup();
     begin
@@ -74,9 +74,9 @@ module KnightsTour_tb();
     /////////////////////////////
     Setup();
 
-    ///////////////////////////////////////////////////////////////////////////
-    // Test moving north by one square from center and starting facing south //
-    ///////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////
+    // Test moving north by one square from center //
+    ////////////////////////////////////////////////
     // Send a command to move the Knight north by one square.
     SendCmd(.cmd_to_send(16'h4001), .cmd(cmd), .clk(clk), .send_cmd(send_cmd), .cmd_sent(cmd_sent));
 

@@ -63,7 +63,7 @@ module cmd_proc(
   logic cntrIR_prev;                   // Previous cntrIR signal from the IR sensor.
   //////////////////////// Y-Calibration Logic ////////////////////////////////////////////
   logic [3:0] y_pos;                   // Indicates the current y-position of the Knight from the start of the board.
-  logic [2:0] difference;              // Computes the difference between the top and current y position on the board.
+  logic [3:0] difference;              // Computes the difference between the top and current y position on the board.
   logic square_done;                   // Indicates that one single square has been moved by the Knight
   logic off_board;                     // Indicates that the Knight is off the board.
   logic came_back;                     // Indicates that the Knight returned to the original position after calibration.

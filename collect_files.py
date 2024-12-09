@@ -10,23 +10,25 @@ test_mapping = {
 }
 
 def collect_design_files(source_dir, target_dir):
-    """Collect all .sv files from designs folders, excluding tests directories."""
+    """Collect all .sv files from every 'designs' subdirectory into a flat structure."""
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
     for root, dirs, files in os.walk(source_dir):
-        # Ignore 'tests' directories
-        dirs[:] = [d for d in dirs if d != "tests"]
-        
-        for file in files:
-            if file.endswith(".sv"):
-                source_file = os.path.join(root, file)
-                # Preserve relative directory structure
-                relative_path = os.path.relpath(root, source_dir)
-                destination_dir = os.path.join(target_dir, relative_path)
-                os.makedirs(destination_dir, exist_ok=True)
-                shutil.copy(source_file, destination_dir)
-                print(f"Copied design file: {source_file} -> {os.path.join(destination_dir, file)}")
+        # Only look for "designs" subfolders and exclude "tests" folders
+        if "designs" in root and "tests" not in root:
+            for file in files:
+                if file.endswith(".sv"):
+                    source_file = os.path.join(root, file)
+                    destination_file = os.path.join(target_dir, file)
+
+                    # Avoid overwriting files with the same name
+                    if os.path.exists(destination_file):
+                        print(f"Warning: File {file} already exists in the target directory. Skipping.")
+                        continue
+
+                    shutil.copy(source_file, destination_file)
+                    print(f"Copied design file: {source_file} -> {destination_file}")
 
 def collect_test_files(test_dir, target_dir, test_range):
     """Collect a range of test files (e.g., KnightsTour_tb_<number>.sv for each number in range)."""
@@ -76,7 +78,7 @@ def main():
     )
     parser.add_argument(
         "-d", "--designs", action="store_true",
-        help="Collect all .sv files from designs folders, excluding tests."
+        help="Collect all .sv files from designs subdirectories, excluding tests, and flatten the structure."
     )
     parser.add_argument(
         "-t", "--test", type=str,
@@ -86,8 +88,6 @@ def main():
 
     current_dir = os.getcwd()
     source_designs_dir = os.path.join(current_dir, "designs")
-    
-    # Now, the tests are located in the tests subfolder of the 'KnightsTour' folder
     source_tests_dir = os.path.join(current_dir, "tests")
     target_dir = os.path.join(current_dir, "..", args.target_directory)
 

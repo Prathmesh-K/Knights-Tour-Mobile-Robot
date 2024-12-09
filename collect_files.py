@@ -10,25 +10,26 @@ test_mapping = {
 }
 
 def collect_design_files(source_dir, target_dir):
-    """Collect all .sv files from every 'designs' subdirectory into a flat structure."""
+    """Collect all .sv files from designs folders, excluding tests directories."""
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
     for root, dirs, files in os.walk(source_dir):
-        # Only look for "designs" subfolders and exclude "tests" folders
-        if "designs" in root and "tests" not in root:
-            for file in files:
-                if file.endswith(".sv"):
-                    source_file = os.path.join(root, file)
-                    destination_file = os.path.join(target_dir, file)
+        # Ignore 'tests' directories
+        dirs[:] = [d for d in dirs if d != "tests"]
+        
+        for file in files:
+            if file.endswith(".sv"):
+                source_file = os.path.join(root, file)
+                destination_file = os.path.join(target_dir, file)
 
-                    # Avoid overwriting files with the same name
-                    if os.path.exists(destination_file):
-                        print(f"Warning: File {file} already exists in the target directory. Skipping.")
-                        continue
+                # Avoid overwriting files with the same name
+                if os.path.exists(destination_file):
+                    print(f"Warning: File {file} already exists in the target directory. Skipping.")
+                    continue
 
-                    shutil.copy(source_file, destination_file)
-                    print(f"Copied design file: {source_file} -> {destination_file}")
+                shutil.copy(source_file, destination_file)
+                print(f"Copied design file: {source_file} -> {destination_file}")
 
 def collect_test_files(test_dir, target_dir, test_range):
     """Collect a range of test files (e.g., KnightsTour_tb_<number>.sv for each number in range)."""
@@ -56,10 +57,15 @@ def collect_test_files(test_dir, target_dir, test_range):
         for root, dirs, files in os.walk(test_subfolder_path):
             if test_filename in files:
                 source_file = os.path.join(root, test_filename)
-                if not os.path.exists(target_dir):
-                    os.makedirs(target_dir)
-                shutil.copy(source_file, target_dir)
-                print(f"Copied test file: {source_file} -> {os.path.join(target_dir, test_filename)}")
+                destination_file = os.path.join(target_dir, test_filename)
+
+                # Avoid overwriting files with the same name
+                if os.path.exists(destination_file):
+                    print(f"Warning: Test file {test_filename} already exists in the target directory. Skipping.")
+                    continue
+
+                shutil.copy(source_file, destination_file)
+                print(f"Copied test file: {source_file} -> {destination_file}")
                 file_found = True
                 found = True
                 break
@@ -70,25 +76,58 @@ def collect_test_files(test_dir, target_dir, test_range):
     if not found:
         print(f"No test files were found for the specified range {test_range[0]}-{test_range[1]}.")
 
+def collect_post_synthesis_files(post_synthesis_dir, target_dir):
+    """Collect all .sv files and the .vg file from the post_synthesis directory."""
+    if not os.path.exists(post_synthesis_dir):
+        print(f"Error: Post-synthesis directory {post_synthesis_dir} does not exist.")
+        return
+
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir)
+
+    found = False
+    for root, dirs, files in os.walk(post_synthesis_dir):
+        for file in files:
+            if file.endswith(".sv") or file.endswith(".vg"):
+                source_file = os.path.join(root, file)
+                destination_file = os.path.join(target_dir, file)
+
+                # Avoid overwriting files with the same name
+                if os.path.exists(destination_file):
+                    print(f"Warning: File {file} already exists in the target directory. Skipping.")
+                    continue
+
+                shutil.copy(source_file, destination_file)
+                print(f"Copied post-synthesis file: {source_file} -> {destination_file}")
+                found = True
+
+    if not found:
+        print(f"No .sv or .vg files were found in the post-synthesis directory.")
+
 def main():
-    parser = argparse.ArgumentParser(description="Collect Verilog files from designs and tests directories.")
+    parser = argparse.ArgumentParser(description="Collect Verilog files from designs, tests, and post-synthesis directories.")
     parser.add_argument(
         "target_directory",
         help="Name of the directory to create for storing collected files."
     )
     parser.add_argument(
         "-d", "--designs", action="store_true",
-        help="Collect all .sv files from designs subdirectories, excluding tests, and flatten the structure."
+        help="Collect all .sv files from designs folders, excluding tests."
     )
     parser.add_argument(
         "-t", "--test", type=str,
         help="Specify a range of test numbers to collect (e.g., 13-16)."
+    )
+    parser.add_argument(
+        "-ps", "--post_synthesis", action="store_true",
+        help="Collect all .sv files and the .vg file from the post_synthesis directory within tests."
     )
     args = parser.parse_args()
 
     current_dir = os.getcwd()
     source_designs_dir = os.path.join(current_dir, "designs")
     source_tests_dir = os.path.join(current_dir, "tests")
+    post_synthesis_dir = os.path.join(source_tests_dir, "post_synthesis")
     target_dir = os.path.join(current_dir, "..", args.target_directory)
 
     # Perform actions based on the flags
@@ -104,9 +143,11 @@ def main():
                 print("Error: Invalid test range. Please provide a valid range like '13-16'.")
         except ValueError:
             print("Error: Test range must be specified as two integers, like '13-16'.")
+    if args.post_synthesis:
+        collect_post_synthesis_files(post_synthesis_dir, target_dir)
 
-    if not args.designs and not args.test:
-        print("Error: You must specify at least one of the flags: --designs (-d) or --test (-t).")
+    if not args.designs and not args.test and not args.post_synthesis:
+        print("Error: You must specify at least one of the flags: --designs (-d), --test (-t), or --post_synthesis (-ps).")
 
 if __name__ == "__main__":
     main()

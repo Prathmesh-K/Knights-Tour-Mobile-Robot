@@ -41,7 +41,7 @@ module KnightsTour_tb();
   //////////////////////////////////////////////////////
   // Instantiate model of Knight Physics (and board) //
   ////////////////////////////////////////////////////
-  KnightPhysics #(15'h2800, 15'h0800) iPHYS(.clk(clk),.RST_n(RST_n),.SS_n(SS_n),.SCLK(SCLK),.MISO(MISO),
+  KnightPhysics #(15'h1800, 15'h1800) iPHYS(.clk(clk),.RST_n(RST_n),.SS_n(SS_n),.SCLK(SCLK),.MISO(MISO),
                       .MOSI(MOSI),.INT(INT),.lftPWM1(lftPWM1),.lftPWM2(lftPWM2),
 					  .rghtPWM1(rghtPWM1),.rghtPWM2(rghtPWM2),.IR_en(IR_en),
 					  .lftIR_n(lftIR_n),.rghtIR_n(rghtIR_n),.cntrIR_n(cntrIR_n)); 
@@ -73,50 +73,31 @@ module KnightsTour_tb();
     Setup();
     
     ////////////////////////////////////////////////////////////////
-    // Test a couple moves of the KnightsTour starting at (2,0)  //
+    // Test a couple moves of the KnightsTour starting at (1,1)  //
     //////////////////////////////////////////////////////////////
-    // Send a command to start the KnightsTour from (2,0).
-    SendCmd(.cmd_to_send(16'h6020), .cmd(cmd), .clk(clk), .send_cmd(send_cmd), .cmd_sent(cmd_sent));
+    // Send a command to start the KnightsTour from (1,1) without giving the y position.
+    SendCmd(.cmd_to_send(16'h7010), .cmd(cmd), .clk(clk), .send_cmd(send_cmd), .cmd_sent(cmd_sent));
+
+    // Wait till the Knight found out its position on the board.
+    ChkOffset(.tour_go(iDUT.tour_go), .clk(clk), .target_yy(3'h1), .actual_yy(iDUT.y_offset));
+
+    // Check if Knight moved back to the starting location on the board.
+    ChkPos(.clk(clk), .target_xx(3'h1), .target_yy(3'h1), .actual_xx(iPHYS.xx), .actual_yy(iPHYS.yy));
 
     // Wait till the solution for the KnightsTour is complete or times out.
     WaitComputeSol(.start_tour(iDUT.start_tour), .clk(clk));
 
-    // Wait till the vertical component of the first move is made.
-    WaitForMove(.send_resp(iDUT.send_resp), .clk(clk));
+    // Wait till the KnightsTour has finished.
+    WaitTourDone(.send_resp(iDUT.send_resp), .clk(clk), .actual_xx(iPHYS.xx), .actual_yy(iPHYS.yy));
 
-    // Check that the response received is 0x5A.
-    ChkAck(.resp_rdy(resp_rdy), .clk(clk), .resp(resp));
-
-    // Wait till the horizontal component of the first move is made.
-    WaitForMove(.send_resp(iDUT.send_resp), .clk(clk));
-
-    // Check that the response received is 0x5A at the end of the first move.
-    ChkAck(.resp_rdy(resp_rdy), .clk(clk), .resp(resp));
-
-    // Check that the Knight is at (0,1) at the end of the first move.
-    ChkPos(.clk(clk), .target_xx(3'h0), .target_yy(3'h1), .actual_xx(iPHYS.xx), .actual_yy(iPHYS.yy));
-
-    // Wait till the second L-shape move is made.
-    WaitTourMove(.send_resp(iDUT.send_resp), .clk(clk), .actual_xx(iPHYS.xx), .actual_yy(iPHYS.yy));
-
-    // Check that the Knight is at (1,3) at the end of the second move.
-    ChkPos(.clk(clk), .target_xx(3'h1), .target_yy(3'h3), .actual_xx(iPHYS.xx), .actual_yy(iPHYS.yy));
-
-    // Wait till the third L-shape move is made.
-    WaitTourMove(.send_resp(iDUT.send_resp), .clk(clk), .actual_xx(iPHYS.xx), .actual_yy(iPHYS.yy));
-
-    // Check that the Knight is at (3,4) at the end of the third move.
-    ChkPos(.clk(clk), .target_xx(3'h3), .target_yy(3'h4), .actual_xx(iPHYS.xx), .actual_yy(iPHYS.yy));
+    // Check that a positive acknowledge is received from the DUT.
+    ChkPosAck(.resp_rdy(resp_rdy), .clk(clk), .resp(resp));
 
     // If we reached here, that means all test cases were successful.
 		$display("YAHOO!! All tests passed.");
 		$stop();
     /////////////////////////////////////////////////////////////////////////////////////////////////
   end
-
-  // Checks that we are never off the board.
-  always @(negedge clk)
-    ChkOffBoard(.clk(clk), .RST_n(RST_n), .frwrd(iDUT.iCMD.frwrd), .cntrIR(iDUT.cntrIR));
   
   always
     #5 clk = ~clk;

@@ -41,7 +41,7 @@ module KnightsTour_tb();
   //////////////////////////////////////////////////////
   // Instantiate model of Knight Physics (and board) //
   ////////////////////////////////////////////////////
-  KnightPhysics #(15'h0800, 15'h4800) iPHYS(.clk(clk),.RST_n(RST_n),.SS_n(SS_n),.SCLK(SCLK),.MISO(MISO),
+  KnightPhysics #(15'h1800, 15'h1800) iPHYS(.clk(clk),.RST_n(RST_n),.SS_n(SS_n),.SCLK(SCLK),.MISO(MISO),
                       .MOSI(MOSI),.INT(INT),.lftPWM1(lftPWM1),.lftPWM2(lftPWM2),
 					  .rghtPWM1(rghtPWM1),.rghtPWM2(rghtPWM2),.IR_en(IR_en),
 					  .lftIR_n(lftIR_n),.rghtIR_n(rghtIR_n),.cntrIR_n(cntrIR_n)); 
@@ -73,16 +73,16 @@ module KnightsTour_tb();
     Setup();
     
     ////////////////////////////////////////////////////////////////
-    // Test a couple moves of the KnightsTour starting at (0,4)  //
+    // Test a couple moves of the KnightsTour starting at (1,1)  //
     //////////////////////////////////////////////////////////////
-    // Send a command to start the KnightsTour from (0,4) without giving the y position.
-    SendCmd(.cmd_to_send(16'h7000), .cmd(cmd), .clk(clk), .send_cmd(send_cmd), .cmd_sent(cmd_sent));
+    // Send a command to start the KnightsTour from (1,1) without giving the y position.
+    SendCmd(.cmd_to_send(16'h7010), .cmd(cmd), .clk(clk), .send_cmd(send_cmd), .cmd_sent(cmd_sent));
 
     // Wait till the Knight found out its position on the board.
-    ChkOffset(.tour_go(iDUT.tour_go), .clk(clk), .target_yy(3'h4), .actual_yy(iDUT.y_offset));
+    ChkOffset(.tour_go(iDUT.tour_go), .clk(clk), .target_yy(3'h1), .actual_yy(iDUT.y_offset));
 
     // Check if Knight moved back to the starting location on the board.
-    ChkPos(.clk(clk), .target_xx(3'h0), .target_yy(3'h4), .actual_xx(iPHYS.xx), .actual_yy(iPHYS.yy));
+    ChkPos(.clk(clk), .target_xx(3'h1), .target_yy(3'h1), .actual_xx(iPHYS.xx), .actual_yy(iPHYS.yy));
 
     // Wait till the solution for the KnightsTour is complete or times out.
     WaitComputeSol(.start_tour(iDUT.start_tour), .clk(clk));

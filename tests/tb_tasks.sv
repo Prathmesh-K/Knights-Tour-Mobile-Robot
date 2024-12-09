@@ -5,6 +5,8 @@ package tb_tasks;
   localparam POS_ACK = 8'hA5;
   localparam ACK = 8'h5A;
 
+  localparam DECR = 3'h4;
+
   typedef enum logic signed [11:0] {NORTH = 12'h000, WEST = 12'h3FF, SOUTH = 12'h7FF, EAST = 12'hBFF} heading_t;
   
   // Task to initialize all input signals to default values.
@@ -82,6 +84,22 @@ package tb_tasks;
         if (actual_yy !== target_yy) begin
           $display("ERROR: y_offset should have been 0x%h but was 0x%h", target_yy, actual_yy);
           $stop(); 
+        end
+      end
+    end
+  endtask
+
+  // Task to check that we are not off the board.
+  task automatic ChkOffBoard(ref clk, ref rst_n, ref [2:0] state, ref [9:0] frwrd, ref cntrIR);
+    begin
+      // Ignore when we are resetting the DUT.
+      if (rst_n) begin 
+        // If we are not resetting the DUT, check if the state is DECR and when the speed is zero, cntrIR is low. 
+        if ((state === DECR) && (frwrd === 10'h000)) begin
+            if (cntrIR) begin
+              $display("ERROR: Knight is off the board.");
+              $stop(); 
+            end
         end
       end
     end

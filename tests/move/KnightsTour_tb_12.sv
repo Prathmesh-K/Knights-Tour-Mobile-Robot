@@ -148,6 +148,10 @@ module KnightsTour_tb();
 		$stop();
     /////////////////////////////////////////////////////////////////////////////////////////////////
   end
+
+  // Checks that we are never off the board.
+  always @(negedge clk)
+    ChkOffBoard(.clk(clk), .rst_n(rst_n), .state(iDUT.iCMD.state), .cntrIR(iDUT.iCMD.cntrIR));
   
   always
     #5 clk = ~clk;

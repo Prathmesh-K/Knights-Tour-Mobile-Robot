@@ -90,10 +90,10 @@ package tb_tasks;
   endtask
 
   // Task to check that we are not off the board.
-  task automatic ChkOffBoard(ref clk, ref rst_n, ref [2:0] state, ref [9:0] frwrd, ref cntrIR);
+  task automatic ChkOffBoard(ref clk, ref RST_n, ref [2:0] state, ref [9:0] frwrd, ref cntrIR);
     begin
       // Ignore when we are resetting the DUT.
-      if (rst_n) begin 
+      if (RST_n) begin 
         // If we are not resetting the DUT, check if the state is DECR and when the speed is zero, cntrIR is low. 
         if ((state === DECR) && (frwrd === 10'h000)) begin
             if (cntrIR) begin

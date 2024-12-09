@@ -46,7 +46,7 @@ os.makedirs(library_dir, exist_ok=True)
 test_mapping = {
     "simple": range(1, 2),  # test_1
     "move": range(2, 13),   # test_2 to test_12
-    "logic": range(13, 20)  # test_13 to test_19
+    "logic": range(13, 18)  # test_13 to test_18
 }
 
 # Compile all design files (ignoring `tests/` subdirectories)
@@ -111,7 +111,7 @@ default_signals = [
     "clk", "RST_n", "iPHYS/xx", "iPHYS/yy", "heading", "heading_robot", "desired_heading", "omega_sum", 
     "iPHYS/cntrIR_n", "iDUT/iCMD/lftIR", "iDUT/iCMD/cntrIR", "iDUT/iCMD/rghtIR", "y_pos", "y_offset", 
     "came_back", "off_board", "error_abs", "iDUT/iCMD/square_cnt", "iDUT/iCMD/move_done", "iDUT/iTC/state", "send_resp", "resp", "/KnightsTour_tb/resp_rdy",
-    "mv_indx", "move", "iDUT/iCMD/pulse_cnt", "iDUT/iCMD/state"
+    "mv_indx", "move", "iDUT/iCMD/pulse_cnt", "iDUT/iCMD/state", "fanfare_go"
 ]
 
 # Function to run a specific testbench

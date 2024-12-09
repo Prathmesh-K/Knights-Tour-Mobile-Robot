@@ -156,7 +156,7 @@ module cmd_proc(
 
   // Implement counter to count number of times the cntrIR pulse went high. 
   always_ff @(posedge clk) begin
-    if (move_cmd | calibrate_y)
+    if (move_cmd | calibrate_y | tour_go)
       pulse_cnt <= 5'h0; // Reset to 0 initially when begining a move or moving forward to calibrate the y-position.
     else if (reverse_heading)
       pulse_cnt <= 5'h1; // When we are reversing the Knight, load in one as we won't see two pulses on the way back.

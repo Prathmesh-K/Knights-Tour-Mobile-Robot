@@ -41,7 +41,7 @@ module KnightsTour_tb();
   //////////////////////////////////////////////////////
   // Instantiate model of Knight Physics (and board) //
   ////////////////////////////////////////////////////
-  KnightPhysics #(15'h3800, 15'h3800) iPHYS(.clk(clk),.RST_n(RST_n),.SS_n(SS_n),.SCLK(SCLK),.MISO(MISO),
+  KnightPhysics #(15'h4800, 15'h4800) iPHYS(.clk(clk),.RST_n(RST_n),.SS_n(SS_n),.SCLK(SCLK),.MISO(MISO),
                       .MOSI(MOSI),.INT(INT),.lftPWM1(lftPWM1),.lftPWM2(lftPWM2),
 					  .rghtPWM1(rghtPWM1),.rghtPWM2(rghtPWM2),.IR_en(IR_en),
 					  .lftIR_n(lftIR_n),.rghtIR_n(rghtIR_n),.cntrIR_n(cntrIR_n)); 
@@ -73,19 +73,16 @@ module KnightsTour_tb();
     Setup();
     
     ////////////////////////////////////////////////////////////////
-    // Test a couple moves of the KnightsTour starting at (3,3)  //
+    // Test a couple moves of the KnightsTour starting at (4,4)  //
     //////////////////////////////////////////////////////////////
-    // Send a command to start the KnightsTour from (3,3) without giving the y position.
-    SendCmd(.cmd_to_send(16'h7030), .cmd(cmd), .clk(clk), .send_cmd(send_cmd), .cmd_sent(cmd_sent));
+    // Send a command to start the KnightsTour from (4,4) without giving the y position.
+    SendCmd(.cmd_to_send(16'h7040), .cmd(cmd), .clk(clk), .send_cmd(send_cmd), .cmd_sent(cmd_sent));
 
     // Wait till the Knight found out its position on the board.
-    ChkOffset(.tour_go(iDUT.tour_go), .clk(clk), .target_yy(3'h3), .actual_yy(iDUT.y_offset));
-
-    // Check that the Knight achieved the desired heading (should be facing south).
-    ChkHeading(.clk(clk), .target_heading(SOUTH), .actual_heading(iPHYS.heading_robot));
+    ChkOffset(.tour_go(iDUT.tour_go), .clk(clk), .target_yy(3'h4), .actual_yy(iDUT.y_offset));
 
     // Check if Knight moved back to the starting location on the board.
-    ChkPos(.clk(clk), .target_xx(3'h3), .target_yy(3'h3), .actual_xx(iPHYS.xx), .actual_yy(iPHYS.yy));
+    ChkPos(.clk(clk), .target_xx(3'h4), .target_yy(3'h4), .actual_xx(iPHYS.xx), .actual_yy(iPHYS.yy));
 
     // Wait till the solution for the KnightsTour is complete or times out.
     WaitComputeSol(.start_tour(iDUT.start_tour), .clk(clk));

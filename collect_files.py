@@ -28,38 +28,45 @@ def collect_design_files(source_dir, target_dir):
                 shutil.copy(source_file, destination_dir)
                 print(f"Copied design file: {source_file} -> {os.path.join(destination_dir, file)}")
 
-def collect_test_file(test_dir, target_dir, test_number):
-    """Collect a specific test file (e.g., KnightsTour_tb_<number>.sv)."""
-    # Determine the subdirectory based on the test number using the test_mapping
-    test_subfolder = None
-    for subfolder, test_range in test_mapping.items():
-        if test_number in test_range:
-            test_subfolder = subfolder
-            break
-    
-    if test_subfolder is None:
-        print(f"Error: Test number {test_number} is out of range or invalid.")
-        return
-    
-    # Build the filename based on the test number
-    test_filename = f"KnightsTour_tb_{test_number}.sv"
-    
-    # Search for the test file within the identified subfolder
-    test_subfolder_path = os.path.join(test_dir, test_subfolder)
+def collect_test_files(test_dir, target_dir, test_range):
+    """Collect a range of test files (e.g., KnightsTour_tb_<number>.sv for each number in range)."""
     found = False
 
-    for root, dirs, files in os.walk(test_subfolder_path):
-        if test_filename in files:
-            source_file = os.path.join(root, test_filename)
-            if not os.path.exists(target_dir):
-                os.makedirs(target_dir)
-            shutil.copy(source_file, target_dir)
-            print(f"Copied test file: {source_file} -> {os.path.join(target_dir, test_filename)}")
-            found = True
-            break
+    # Process each test number in the specified range
+    for test_number in range(test_range[0], test_range[1] + 1):
+        test_filename = f"KnightsTour_tb_{test_number}.sv"
+        
+        # Determine the subdirectory based on the test number using the test_mapping
+        test_subfolder = None
+        for subfolder, test_range_values in test_mapping.items():
+            if test_number in test_range_values:
+                test_subfolder = subfolder
+                break
+        
+        if test_subfolder is None:
+            print(f"Error: Test number {test_number} is out of range or invalid.")
+            continue
+        
+        # Search for the test file within the identified subfolder
+        test_subfolder_path = os.path.join(test_dir, test_subfolder)
+        file_found = False
+
+        for root, dirs, files in os.walk(test_subfolder_path):
+            if test_filename in files:
+                source_file = os.path.join(root, test_filename)
+                if not os.path.exists(target_dir):
+                    os.makedirs(target_dir)
+                shutil.copy(source_file, target_dir)
+                print(f"Copied test file: {source_file} -> {os.path.join(target_dir, test_filename)}")
+                file_found = True
+                found = True
+                break
+
+        if not file_found:
+            print(f"Error: Test file {test_filename} not found in {test_subfolder_path}.")
 
     if not found:
-        print(f"Error: Test file {test_filename} not found in {test_subfolder_path}.")
+        print(f"No test files were found for the specified range {test_range[0]}-{test_range[1]}.")
 
 def main():
     parser = argparse.ArgumentParser(description="Collect Verilog files from designs and tests directories.")
@@ -72,8 +79,8 @@ def main():
         help="Collect all .sv files from designs folders, excluding tests."
     )
     parser.add_argument(
-        "-t", "--test", type=int,
-        help="Specify a test number to collect (e.g., KnightsTour_tb_<number>.sv)."
+        "-t", "--test", type=str,
+        help="Specify a range of test numbers to collect (e.g., 13-16)."
     )
     args = parser.parse_args()
 
@@ -87,10 +94,18 @@ def main():
     # Perform actions based on the flags
     if args.designs:
         collect_design_files(source_designs_dir, target_dir)
-    if args.test is not None:
-        collect_test_file(source_tests_dir, target_dir, args.test)
+    if args.test:
+        # Parse the range from the input argument (e.g., "13-16")
+        try:
+            test_range = [int(x) for x in args.test.split('-')]
+            if len(test_range) == 2 and test_range[0] <= test_range[1]:
+                collect_test_files(source_tests_dir, target_dir, test_range)
+            else:
+                print("Error: Invalid test range. Please provide a valid range like '13-16'.")
+        except ValueError:
+            print("Error: Test range must be specified as two integers, like '13-16'.")
 
-    if not args.designs and args.test is None:
+    if not args.designs and not args.test:
         print("Error: You must specify at least one of the flags: --designs (-d) or --test (-t).")
 
 if __name__ == "__main__":

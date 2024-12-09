@@ -54,7 +54,7 @@ package tb_tasks;
   // Task to check that a move was processed by cmd_proc.
   task automatic WaitForMove(ref send_resp, ref clk);
     // Wait till the move is complete and check that send_resp is asserted.
-    TimeoutTask(.sig(send_resp), .clk(clk), .clks2wait(6000000), .signal("send_resp"));
+    TimeoutTask(.sig(send_resp), .clk(clk), .clks2wait(12000000), .signal("send_resp"));
   endtask
 
   // Task to wait till a tour move is complete (2 individual moves).

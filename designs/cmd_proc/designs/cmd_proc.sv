@@ -65,7 +65,7 @@ module cmd_proc(
   logic [3:0] y_pos;                   // Indicates the current y-position of the Knight from the start of the board.
   logic [2:0] difference;              // Computes the difference between the top and current y position on the board.
   logic square_done;                   // Indicates that one single square has been moved by the Knight
-  logic off_board;
+  logic off_board;                     // Indicates that the Knight is off the board.
   logic came_back;                     // Indicates that the Knight returned to the original position after calibration.
   ////////////////////////////// PID Interface Logic ////////////////////////////////////
   logic signed [11:0] desired_heading; // Compute the desired heading based on the command given.
@@ -75,7 +75,7 @@ module cmd_proc(
   logic move_cmd;                      // The command that tells Knight to move from the state machine.
   logic calibrate_y;                   // Indicates calibration of the y-position of the Knight.
   logic set_came_back;                 // Indicates that we came back to the starting location.
-  logic set_off_board;
+  logic set_off_board;                 // Sets off_board when the Knight is off the board.
   logic reverse_heading;               // Indicates that we are reversing the heading of the Knight.
   logic clr_frwrd;                     // Tells the Knight to ramp up its speed starting from 0.
   logic inc_frwrd;                     // Tells the Knight to ramp up its speed.
@@ -182,15 +182,15 @@ module cmd_proc(
     else if (square_done) // Increment the counter each time a square is done.
       y_pos <= y_pos + 1'b1; // Increment the offset to know how far the Knight is from the end of the board.
     else if (tour_go)
-        y_pos <= 1'b0; // Clear the offset.
+      y_pos <= 1'b0; // Clear the offset.
   end
 
-  // Implement SR flop for detecting when we are off of the board
+  // Implement SR flop for detecting when we are off of the board.
   always_ff @(posedge clk, negedge rst_n) begin
     if (!rst_n)
       off_board <= 1'b0;
     else if (!cntrIR)
-      off_board <= 1'b0;
+      off_board <= 1'b0; // We are no longer off the board when cntrIR is low.
     else if (set_off_board)
       off_board <= 1'b1;
   end
@@ -369,7 +369,7 @@ module cmd_proc(
             end
             CALY: begin
               calibrate_y = 1'b1; // Enable calibration of the y_offset.
-              nxt_state = MOVE;   // Command to move forward and slow down (optionally with fanfare).
+              nxt_state = MOVE;   // Command to move forward and slow down.
             end
             default : begin // MOV, FANFARE opcodes.
               move_cmd = 1'b1;  // Command to move.
